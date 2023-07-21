@@ -1,3 +1,4 @@
+import 'package:fight_manager/timer_page/timer_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -50,13 +51,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Image.asset(
-          'assets/images/SedoriManager_Appicons_2_white.png',
-          height: 140,
-        ),
-        backgroundColor: const Color(0xFF222831),
-      ),
+      appBar: AppBar(),
       // appBar: AppBar(
       //   title: const Text('せどりマネージャー'),
       //   backgroundColor: const Color(0xFF222831),
@@ -80,7 +75,7 @@ class _SignInPageState extends State<SignInPage> {
 
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (cotext) {
-                  return const BasePage(
+                  return const TimerPage(
                     title: '',
                   );
                 }),
