@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "688655316041",
+    "project_id": "fight-manager-7262b",
+    "storage_bucket": "fight-manager-7262b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688655316041:android:c769931ffafa78e17a7b98",
+        "android_client_info": {
+          "package_name": "com.jumbo.fight_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "688655316041-ooh18gm6tsav9300eljihoqojh86gopk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4rJrJKuvh-wjCMunDhjP1GGnUJeGFyFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "688655316041-ooh18gm6tsav9300eljihoqojh86gopk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
