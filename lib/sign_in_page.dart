@@ -1,3 +1,4 @@
+import 'package:fight_manager/timer_page/count_up_timer_page.dart';
 import 'package:fight_manager/timer_page/timer_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -75,9 +76,7 @@ class _SignInPageState extends State<SignInPage> {
 
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (cotext) {
-                  return const TimerPage(
-                    title: '',
-                  );
+                  return CountUpTimerPage();
                 }),
                 (route) => false,
               );

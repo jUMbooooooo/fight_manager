@@ -1,6 +1,8 @@
-import 'package:fight_manager/timer_page/rounded_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fight_manager/task_page/task_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
+import '';
 
 class CountUpTimerPage extends StatefulWidget {
   static Future<void> navigatorPush(BuildContext context) async {
@@ -13,41 +15,38 @@ class CountUpTimerPage extends StatefulWidget {
   }
 
   @override
-  _State createState() => _State();
+  _CountUpTimerPageState createState() => _CountUpTimerPageState();
 }
 
-class _State extends State<CountUpTimerPage> {
+class _CountUpTimerPageState extends State<CountUpTimerPage> {
   final _isHours = true;
-
-  final StopWatchTimer _stopWatchTimer = StopWatchTimer(
+  final _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countUp,
-    onChange: (value) => print('onChange $value'),
-    onChangeRawSecond: (value) => print('onChangeRawSecond $value'),
-    onChangeRawMinute: (value) => print('onChangeRawMinute $value'),
-    onStopped: () {
-      print('onStop');
-    },
-    onEnded: () {
-      print('onEnded');
-    },
   );
+  bool _isRunning = false; // Stopwatch running state
 
-  final _scrollController = ScrollController();
+  List<String> tasks = [];
+  String dropdownValue = '';
 
   @override
   void initState() {
     super.initState();
-    _stopWatchTimer.rawTime.listen((value) =>
-        print('rawTime $value ${StopWatchTimer.getDisplayTime(value)}'));
-    _stopWatchTimer.minuteTime.listen((value) => print('minuteTime $value'));
-    _stopWatchTimer.secondTime.listen((value) => print('secondTime $value'));
-    _stopWatchTimer.records.listen((value) => print('records $value'));
-    _stopWatchTimer.fetchStopped
-        .listen((value) => print('stopped from stream'));
-    _stopWatchTimer.fetchEnded.listen((value) => print('ended from stream'));
+    // Firestoreからタスクを取得する
+    _fetchTasksFromFirestore();
+  }
 
-    /// Can be set preset time. This case is "00:01.23".
-    // _stopWatchTimer.setPresetTime(mSec: 1234);
+  Future<void> _fetchTasksFromFirestore() async {
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('tasks').get();
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      setState(() {
+        tasks.add(doc['taskName']);
+        if (dropdownValue.isEmpty) {
+          dropdownValue = tasks.first;
+        }
+      });
+    }
   }
 
   @override
@@ -60,362 +59,94 @@ class _State extends State<CountUpTimerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Count Up Timer'),
+        title: const Text('FightManager'),
       ),
-      body: Scrollbar(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 32,
-              horizontal: 16,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: Colors.black,
-                        width: 2.0,
-                      ),
-                    ),
-                    labelStyle: TextStyle(
-                      fontSize: 15,
-                      color: Colors.grey,
-                    ),
-                    labelText: 'タスクネーム',
-                    floatingLabelStyle: const TextStyle(fontSize: 12),
-                  ),
-                ),
-
-                /// Display stop watch time
-                StreamBuilder<int>(
-                  stream: _stopWatchTimer.rawTime,
-                  initialData: _stopWatchTimer.rawTime.value,
-                  builder: (context, snap) {
-                    final value = snap.data!;
-                    final displayTime =
-                        StopWatchTimer.getDisplayTime(value, hours: _isHours);
-                    return Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            displayTime,
-                            style: const TextStyle(
-                                fontSize: 40,
-                                fontFamily: 'Helvetica',
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            value.toString(),
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'Helvetica',
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-
-                /// Display every minute.
-                StreamBuilder<int>(
-                  stream: _stopWatchTimer.minuteTime,
-                  initialData: _stopWatchTimer.minuteTime.value,
-                  builder: (context, snap) {
-                    final value = snap.data;
-                    print('Listen every minute. $value');
-                    return Column(
-                      children: <Widget>[
-                        Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  child: Text(
-                                    value.toString(),
-                                    style: const TextStyle(
-                                        fontSize: 30,
-                                        fontFamily: 'Helvetica',
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4),
-                                  child: Text(
-                                    '分',
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontFamily: 'Helvetica',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                      ],
-                    );
-                  },
-                ),
-
-                /// Display every second.
-                StreamBuilder<int>(
-                  stream: _stopWatchTimer.secondTime,
-                  initialData: _stopWatchTimer.secondTime.value,
-                  builder: (context, snap) {
-                    final value = snap.data;
-                    print('Listen every second. $value');
-                    return Column(
-                      children: <Widget>[
-                        Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  child: Text(
-                                    value.toString(),
-                                    style: const TextStyle(
-                                      fontSize: 30,
-                                      fontFamily: 'Helvetica',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4),
-                                  child: Text(
-                                    '秒',
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontFamily: 'Helvetica',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                      ],
-                    );
-                  },
-                ),
-
-                /// Lap time.
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: SizedBox(
-                    height: 100,
-                    child: StreamBuilder<List<StopWatchRecord>>(
-                      stream: _stopWatchTimer.records,
-                      initialData: _stopWatchTimer.records.value,
-                      builder: (context, snap) {
-                        final value = snap.data!;
-                        if (value.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        Future.delayed(const Duration(milliseconds: 100), () {
-                          _scrollController.animateTo(
-                              _scrollController.position.maxScrollExtent,
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOut);
-                        });
-                        print('Listen records. $value');
-                        return ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (BuildContext context, int index) {
-                            final data = value[index];
-                            return Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    '${index + 1} ${data.displayTime}',
-                                    style: const TextStyle(
-                                        fontSize: 17,
-                                        fontFamily: 'Helvetica',
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                const Divider(
-                                  height: 1,
-                                )
-                              ],
-                            );
-                          },
-                          itemCount: value.length,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                /// Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: RoundedButton(
-                          color: Colors.lightBlue,
-                          onTap: _stopWatchTimer.onStartTimer,
-                          child: const Text(
-                            'Start',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: RoundedButton(
-                          color: Colors.green,
-                          onTap: _stopWatchTimer.onStopTimer,
-                          child: const Text(
-                            'Stop',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: RoundedButton(
-                          color: Colors.red,
-                          onTap: _stopWatchTimer.onResetTimer,
-                          child: const Text(
-                            'Reset',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.all(0).copyWith(right: 8),
-                          child: RoundedButton(
-                            color: Colors.deepPurpleAccent,
-                            onTap: _stopWatchTimer.onAddLap,
-                            child: const Text(
-                              'Lap',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: RoundedButton(
-                            color: Colors.pinkAccent,
-                            onTap: () {
-                              _stopWatchTimer.setPresetHoursTime(1);
-                            },
-                            child: const Text(
-                              'Set Hours',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: RoundedButton(
-                            color: Colors.pinkAccent,
-                            onTap: () {
-                              _stopWatchTimer.setPresetMinuteTime(59);
-                            },
-                            child: const Text(
-                              'Set Minute',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: RoundedButton(
-                          color: Colors.pinkAccent,
-                          onTap: () {
-                            _stopWatchTimer.setPresetSecondTime(10);
-                          },
-                          child: const Text(
-                            'Set +Second',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: RoundedButton(
-                          color: Colors.pinkAccent,
-                          onTap: () {
-                            _stopWatchTimer.setPresetSecondTime(-10);
-                          },
-                          child: const Text(
-                            'Set -Second',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: RoundedButton(
-                    color: Colors.pinkAccent,
-                    onTap: _stopWatchTimer.clearPresetTime,
-                    child: const Text(
-                      'Clear PresetTime',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('タスク設定'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TaskSettingPage()),
+                );
+              },
             ),
-          ),
+          ],
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            DropdownButton<String>(
+              value: dropdownValue,
+              icon: const Icon(Icons.arrow_downward),
+              iconSize: 24,
+              elevation: 16,
+              style: const TextStyle(color: Colors.deepPurple),
+              underline: Container(
+                height: 2,
+                color: Colors.deepPurpleAccent,
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue!;
+                });
+              },
+              items: tasks.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            StreamBuilder<int>(
+              stream: _stopWatchTimer.rawTime,
+              initialData: _stopWatchTimer.rawTime.value,
+              builder: (context, snap) {
+                final value = snap.data!;
+                final displayTime =
+                    StopWatchTimer.getDisplayTime(value, hours: _isHours);
+                return Text(
+                  displayTime,
+                  style: const TextStyle(
+                      fontSize: 40,
+                      fontFamily: 'Helvetica',
+                      fontWeight: FontWeight.bold),
+                );
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  if (_isRunning) {
+                    _stopWatchTimer.onStopTimer();
+                  } else {
+                    _stopWatchTimer.onStartTimer();
+                  }
+                  _isRunning = !_isRunning;
+                });
+              },
+              child: Text(_isRunning ? 'タスク終わり' : 'タスク始め'),
+            ),
+          ],
         ),
       ),
     );

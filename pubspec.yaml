@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^4.7.1
   firebase_core: ^2.15.0
   stop_watch_timer: ^3.0.1
+  cloud_firestore: ^4.8.3
 
 dev_dependencies:
   flutter_test:

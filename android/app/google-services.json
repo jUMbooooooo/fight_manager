@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "688655316041-ooh18gm6tsav9300eljihoqojh86gopk.apps.googleusercontent.com",
+          "client_id": "688655316041-l5crfji2ni8porbn96d220m8m5o657t6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jumbo.fight_manager",
+            "certificate_hash": "b2c942ec1182849286c2e4b4bc76dac2ae63b01f"
+          }
+        },
+        {
+          "client_id": "688655316041-r2a862n0pd6b14klle2epht6u2te95m0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -29,6 +37,13 @@
             {
               "client_id": "688655316041-ooh18gm6tsav9300eljihoqojh86gopk.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "688655316041-202aikb9slfkvhdqv5046mqioch6r0b0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jumbo.fightManager"
+              }
             }
           ]
         }
