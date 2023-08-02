@@ -92,61 +92,90 @@ class _CountUpTimerPageState extends State<CountUpTimerPage> {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            DropdownButton<String>(
-              value: dropdownValue,
-              icon: const Icon(Icons.arrow_downward),
-              iconSize: 24,
-              elevation: 16,
-              style: const TextStyle(color: Colors.deepPurple),
-              underline: Container(
-                height: 2,
-                color: Colors.deepPurpleAccent,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              DropdownButton<String>(
+                value: dropdownValue,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    dropdownValue = newValue!;
+                  });
+                },
+                isExpanded: true, // これを追加
+                items: tasks.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                    ),
+                  );
+                }).toList(),
+                selectedItemBuilder: (BuildContext context) {
+                  return tasks.map<Widget>((String value) {
+                    return Center(
+                      child: Text(
+                        value,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
               ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownValue = newValue!;
-                });
-              },
-              items: tasks.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            StreamBuilder<int>(
-              stream: _stopWatchTimer.rawTime,
-              initialData: _stopWatchTimer.rawTime.value,
-              builder: (context, snap) {
-                final value = snap.data!;
-                final displayTime =
-                    StopWatchTimer.getDisplayTime(value, hours: _isHours);
-                return Text(
-                  displayTime,
-                  style: const TextStyle(
-                      fontSize: 40,
-                      fontFamily: 'Helvetica',
-                      fontWeight: FontWeight.bold),
-                );
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  if (_isRunning) {
-                    _stopWatchTimer.onStopTimer();
-                  } else {
-                    _stopWatchTimer.onStartTimer();
-                  }
-                  _isRunning = !_isRunning;
-                });
-              },
-              child: Text(_isRunning ? 'タスク終わり' : 'タスク始め'),
-            ),
-          ],
+              StreamBuilder<int>(
+                stream: _stopWatchTimer.rawTime,
+                initialData: _stopWatchTimer.rawTime.value,
+                builder: (context, snap) {
+                  final value = snap.data!;
+                  final displayTime =
+                      StopWatchTimer.getDisplayTime(value, hours: _isHours);
+                  return Text(
+                    displayTime,
+                    style: const TextStyle(
+                        fontSize: 40,
+                        fontFamily: 'Helvetica',
+                        fontWeight: FontWeight.bold),
+                  );
+                },
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    if (_isRunning) {
+                      _stopWatchTimer.onStopTimer();
+                    } else {
+                      _stopWatchTimer.onStartTimer();
+                    }
+                    _isRunning = !_isRunning;
+                  });
+                },
+                child: Text(_isRunning ? 'タスク終わり' : 'タスク始め'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _stopWatchTimer.onResetTimer();
+                  });
+                },
+                child: Text('リセット'),
+              ),
+            ],
+          ),
         ),
       ),
     );
